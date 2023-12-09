@@ -62,7 +62,7 @@ def set_up_matrix(Mx, My, dx, dy, sigma_x, sigma_y):
     
     return A
 
-def show_the_plot(v, Mx, My, Lx, Ly, dx, dy):
+def show_the_plot(v, Mx, My, Lx, Ly, dx, dy, save_name):
     t_plot = v[:,::500]
 
     x_axis = np.arange(0, Lx + dx, dx)
@@ -83,5 +83,7 @@ def show_the_plot(v, Mx, My, Lx, Ly, dx, dy):
     # show color bar
     f.colorbar(bar, ax=ax[3])
     
+    plt.savefig(save_name + ".png")
+
     plt.show()
 

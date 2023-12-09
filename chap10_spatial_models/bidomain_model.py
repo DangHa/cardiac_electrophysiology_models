@@ -1,12 +1,10 @@
-import math
 import numpy as np
-import scipy
+import timeit
 
-from helper_functions import set_up_matrix, show_the_plot
+from chap10_spatial_models.helper_functions import set_up_matrix, show_the_plot
 
-# Parsimonious Model 
-def membrane_model():
-
+# Bidomain model with Parsimonious Model for membrane
+def bidomain_model():
     # Set up parameters for bidomain
     Cm = 1           # uF/cm^2
     chi = 2000       # 1/cm
@@ -103,14 +101,14 @@ def membrane_model():
             print(f"Running ... {(n+1)//(N//10)*10} %")
 
     # Show the plots
-    show_the_plot(v, Mx, My, Lx, Ly, dx, dy)
-
-    show_the_plot(u, Mx, My, Lx, Ly, dx, dy)
-
-# Bidomain model
-def bidomain_model():
-
-    return 0
+    show_the_plot(v, Mx, My, Lx, Ly, dx, dy, "bidomain_Vm")  # Vm
+    show_the_plot(u, Mx, My, Lx, Ly, dx, dy, "bidomain_Ue")  # Ue
 
 
-membrane_model()
+if __name__ == "__main__":
+    start = timeit.default_timer()
+
+    bidomain_model()
+
+    stop = timeit.default_timer()
+    print("Time: " + str(stop - start) + " s")
