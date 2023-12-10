@@ -65,16 +65,20 @@ def set_up_matrix(Mx, My, dx, dy, sigma_x, sigma_y):
 def show_the_plot(v, Mx, My, Lx, Ly, dx, dy, save_name):
     t_plot = v[:,::500]
 
+    # x,y dimension 
     x_axis = np.arange(0, Lx + dx, dx)
     y_axis = np.arange(0, Ly + dy, dy)
     [x, y] = np.meshgrid(x_axis, y_axis)
 
     f, ax = plt.subplots(1,4, figsize=(15, 3))
+
+    # plots
     ax[0].pcolor(x, y, np.reshape(t_plot[:,1], (Mx, My)))
     ax[1].pcolor(x, y, np.reshape(t_plot[:,2], (Mx, My)))
     ax[2].pcolor(x, y, np.reshape(t_plot[:,3], (Mx, My)))
     bar = ax[3].pcolor(x, y, np.reshape(t_plot[:,4], (Mx, My)))
 
+    # labels
     ax[0].title.set_text('t = 0.5')
     ax[1].title.set_text('t = 1.0')
     ax[2].title.set_text('t = 1.5')
