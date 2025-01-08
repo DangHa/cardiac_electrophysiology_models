@@ -1,10 +1,13 @@
 import numpy as np
 import timeit
+import pandas as pd
 
-from chap10_spatial_models.helper_functions import set_up_matrix, show_the_plot
+from helper_functions import set_up_matrix, show_the_plot, show_AP_at_one_point
 
 # Monodomain model with Parsimonious Model for membrane
-def monodomain_model():
+def monodomain_model(T, dt, Lx, Ly, dx, dy, x_stim, y_stim, save_name):
+    start = timeit.default_timer()
+
     # Set up parameters for bidomain
     Cm = 1           # uF/cm^2
     chi = 2000       # 1/cm
@@ -25,12 +28,12 @@ def monodomain_model():
     t_stim = 0     # Stimulation start time (in ms)
     d_stim = 2     # Stimulation current duration (in ms)
     a_stim = -25   # Stimulation current amplitude (in uA/cm^2)
-    l_stim = 0.25  # Radius of the stimulation area (in cm)
+    l_stim = 0.15  # Radius of the stimulation area (in cm)
 
     # Ionic currents
     I_Na = lambda v, m, h: g_Na*(m**3)*h*(v-v_Na)
     I_K = lambda v: g_K*np.exp(-b_K*(v-v_K))*(v-v_K)
-    I_stim = lambda t, x, y: a_stim * (t >= t_stim) * (t <= t_stim + d_stim) * (np.sqrt(x**2 + y**2) <= l_stim)
+    I_stim = lambda t, x, y: a_stim * (t >= t_stim) * (t <= t_stim + d_stim) * (np.sqrt((x - x_stim)**2 + (y - y_stim)**2) <= l_stim)
 
     # Define rate constants
     m_inf = lambda v: 1/(1+np.exp((v-Em)/km))
@@ -39,14 +42,8 @@ def monodomain_model():
     tau_h = lambda v: 2*tau_h_0*np.exp(delta_h*(v-Eh)/kh)/(1+np.exp((v-Eh)/kh))
 
     # Set up discrerization
-    T = 20                                     # Total simulation time (in ms)
-    dt = 0.01                                  # Time step (in ms)
     N = round(T/dt)                            # Number of time steps
     t = np.arange(0, T+dt, dt)[:, None]        # Time vector
-    Lx = 1                                     # Length of the domain in the x-direction (in cm)
-    Ly = 1                                     # Length of the domain in the y-direction (in cm)
-    dx = 0.05                                  # Discretization step in the x-direction (in cm)
-    dy = 0.05                                  # Discretization step in the y-direction (in cm)
     Mx = round(Lx/dx) + 1                      # Number of point in the x-direction
     My = round(Ly/dy) + 1                      # Number of point in the y-direction
     M = Mx*My                                  # Total number of spatial points
@@ -84,14 +81,31 @@ def monodomain_model():
         if ((n+1) % (N//10) == 0):
             print(f"Running ... {(n+1)//(N//10)*10} %")
 
-    # Show the plots
-    show_the_plot(v, Mx, My, Lx, Ly, dx, dy, "monodomain_Vm")
+    print("Time: " + str(timeit.default_timer() - start) + " s")
+
+    # Save results to CSV
+    df = pd.DataFrame(v)
+    df.to_csv(save_name, index=False)
 
 
 if __name__ == "__main__":
-    start = timeit.default_timer()
+    T = 30                                    # Total simulation time (in ms)
+    dt = 0.01                                  # Time step (in ms)
+    Lx = 1                                     # Length of the domain in the x-direction (in cm)
+    Ly = 1                                     # Length of the domain in the y-direction (in cm)
+    dx = 0.05                                  # Discretization step in the x-direction (in cm)
+    dy = 0.05                                  # Discretization step in the y-direction (in cm)
+    x_stim = 0.5                                 # x-coordinate of the point where the AP is to be plotted
+    y_stim = 0.5                                 # y-coordinate of the point where the AP is to be plotted
+    save_name = "monodomain.csv"                # Name of the file where the membrane potential should be saved
 
-    monodomain_model()
+    # Run the monodomain model
+    monodomain_model(T, dt, Lx, Ly, dx, dy, x_stim, y_stim, save_name)
+    
+    # Show the plots
+    show_the_plot(save_name, T, dt, Lx, Ly, dx, dy, "monodomain_Vm")
 
-    stop = timeit.default_timer()
-    print("Time: " + str(stop - start) + " s")
+    # Show the AP at one point
+    show_AP_at_one_point(save_name, T, dt, Lx, Ly, dx, dy, x_stim, y_stim, "monodomain_AP")
+    
+    
